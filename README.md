@@ -4,6 +4,8 @@ This is a basic prometheus exporter for the new API in Pi-hole version 6, curren
 
 [There is a Grafana Dashboard as well!](https://grafana.com/grafana/dashboards/21043-pi-hole-ver6-stats/)
 
+[Docker Image](https://hub.docker.com/r/totaltax/pihole6_exporter)
+
 **UPDATE:** Also included here (see below) is a query logger meant to run as a systemd timer every minute.  It generates digestible logs out of the API's `/queries` call!
 
 ## pihole6_exporter
@@ -11,15 +13,7 @@ This is a basic prometheus exporter for the new API in Pi-hole version 6, curren
 ### Running
 
 ```
-usage: pihole6_exporter [-h] [-H HOST] [-p PORT] [-k KEY]
-
-Prometheus exporter for Pi-hole version 6+
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -H HOST, --host HOST  hostname/ip of pihole instance (default localhost)
-  -p PORT, --port PORT  port to expose for scraping (default 9666)
-  -k KEY, --key KEY     authentication token
+$ HOST=[pihole_ip] KEY=[your_api_key] PORT=[port] pihole6_exporter
 ```
 
 If using locally and you have the `Local clients need to authenticate to access the API` option un-selected, a key is not necessary.  This key is the "app password", not the session ID that is created with it.
@@ -35,7 +29,7 @@ The session ID should stay active as long as it is used at least every 5 minutes
 
 * Copy the exporter itself over to `/usr/local/bin`
 * Copy the systemd service file over to `/etc/systemd/system/` (or anywhere systemd will find it)
-    * Modify the `Exec=` line with any command line args (like a key) as needed.  Currently there is no config file.  
+    * Modify the `Enviroment=` lines as needed.  Currently there is no config file.  
 * `systemctl start pihole6-exporter` to start the exporter.
 * `systemctl enable pihole6-exporter` to have it start automatically.
 

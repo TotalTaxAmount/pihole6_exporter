@@ -3,6 +3,9 @@ Description=Pihole 6 Prometheus Exporter
 After=pihole-FTL.service
 
 [Service]
+Environment="KEY="
+Environment="HOST=localhost"
+Environment="PORT=9666"
 ExecStart=/usr/local/bin/pihole6_exporter
 Type=exec
 Restart=always

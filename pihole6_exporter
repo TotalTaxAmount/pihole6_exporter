@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 
+import os
 import time
 import requests
 import urllib3
-import argparse
 import logging
 from datetime import datetime
 from prometheus_client.core import GaugeMetricFamily, REGISTRY
 from prometheus_client import start_http_server
 
+HOST = os.getenv("PIHOLE_HOST", "localhost")
+PORT = int(os.getenv("PORT", "9666"))
+KEY  = os.getenv("PIHOLE_KEY", None)
 
 class PiholeCollector(object):
-
-
     def __init__(self, host="localhost", key=None):
 
         self.using_auth = False
@@ -244,21 +245,10 @@ class PiholeCollector(object):
         
 
 if __name__ == '__main__':
-    
-    logging.basicConfig(format='level="%(levelname)s" message="%(message)s"', level=logging.INFO)
-
-    parser = argparse.ArgumentParser(description="Prometheus exporter for Pi-hole version 6+")
-
-    parser.add_argument("-H", "--host", dest="host", type=str, required=False, help="hostname/ip of pihole instance (default localhost)", default="localhost")
-    parser.add_argument("-p", "--port", dest="port", type=int, required=False, help="port to expose for scraping (default 9666)", default=9666)
-    parser.add_argument("-k", "--key", dest="key", type=str, required=False, help="authentication token (if required)", default=None)
-
-    args = parser.parse_args()
-
-    start_http_server(args.port)
+    start_http_server(PORT)
     logging.info("Exporter HTTP endpoint started")
 
-    REGISTRY.register(PiholeCollector(args.host, args.key))
+    REGISTRY.register(PiholeCollector(HOST, KEY))
     logging.info("Ready to collect data")
     while True:
         time.sleep(1)
