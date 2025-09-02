@@ -13,7 +13,19 @@ This is a basic prometheus exporter for the new API in Pi-hole version 6, curren
 ### Running
 
 ```
-$ HOST=[pihole_ip] KEY=[your_api_key] PORT=[port] pihole6_exporter
+$ PIHOLE_HOST=localhost PIHOLE_PORT=443 PIHOLE_PROTOCOL=https EXPORTER_PORT=9666 KEY="" pihole6_exporter
+```
+### Via docker
+```
+docker run -d \ 
+  --name pihole6_exporter \
+  -p 9666:9666 \
+  -e EXPORTER_PORT=9666 # These are all default values
+  -e PIHOLE_PROTOCOL="https" \
+  -e PIHOLE_PORT=443 \ 
+  -e PIHOLE_HOST="localhost" \ 
+  -e KEY="" \ # Leave blank for no auth
+  totaltax/pihole6_exporter:latest
 ```
 
 If using locally and you have the `Local clients need to authenticate to access the API` option un-selected, a key is not necessary.  This key is the "app password", not the session ID that is created with it.

@@ -9,18 +9,19 @@ from datetime import datetime
 from prometheus_client.core import GaugeMetricFamily, REGISTRY
 from prometheus_client import start_http_server
 
-HOST = os.getenv("PIHOLE_HOST", "localhost")
-PORT = int(os.getenv("PORT", "9666"))
-KEY  = os.getenv("PIHOLE_KEY", None)
+PIHOLE_HOST = os.getenv("PIHOLE_HOST", "localhost")
+PIHOLE_PORT = os.getenv("PIHOLE_PORT", "443")
+PIHOLE_PROTOCOL = os.getenv("PIHOLE_PROTOCOL", "https")
+EXPORTER_PORT = int(os.getenv("EXPORTER_PORT", "9666"))
+KEY = os.getenv("KEY", None)
 
 class PiholeCollector(object):
-    def __init__(self, host="localhost", key=None):
+    def __init__(self, protocol, host, port, key):
 
         self.using_auth = False
         # Disable if you've actually got a good cert set up.
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-        self.host = host
+        self.base_url = f"{protocol}://{host}:{port}"
 
         if key is not None:
             self.using_auth = True
@@ -34,7 +35,7 @@ class PiholeCollector(object):
 
 
     def get_sid(self, key):
-        auth_url = "https://" + self.host + ":443/api/auth"
+        auth_url = f"{self.base_url}/api/auth"
         headers = {"accept": "application/json", "content_type": "application/json"}
         json_data = {"password": key}
         req = requests.post(auth_url, verify = False, headers = headers, json = json_data)
@@ -44,13 +45,12 @@ class PiholeCollector(object):
 
 
     def get_api_call(self, api_path):
-        url = "https://" + self.host + ":443/api/" + api_path
+        url = f"{self.base_url}/api/{api_path}"
         if self.using_auth:
             headers = {"accept": "application/json", "sid": self.sid}
         else:
             headers = {"accept": "application/json"}
         req = requests.get(url, verify = False, headers = headers)
-        
         return req.json()
 
 
@@ -245,10 +245,10 @@ class PiholeCollector(object):
         
 
 if __name__ == '__main__':
-    start_http_server(PORT)
+    start_http_server(EXPORTER_PORT)
     logging.info("Exporter HTTP endpoint started")
 
-    REGISTRY.register(PiholeCollector(HOST, KEY))
+    REGISTRY.register(PiholeCollector(PIHOLE_PROTOCOL, PIHOLE_HOST, PIHOLE_PORT, KEY))
     logging.info("Ready to collect data")
     while True:
         time.sleep(1)
